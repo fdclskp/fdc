@@ -5,14 +5,8 @@
 #SMA,EMA,SAR,BBANDS,MACD,ROC,RSI,ADX,ADOSC,CCI,ATR,STOCHRSI,STOCHF,AROON,OBV,MFI.VOLUME 多すぎ？
 #BBANDS, SAR,MACD,RSI,STOCHRSI,VOLUME 
 import pandas as pd
-import datetime
-import pandas_datareader.data as web
-import matplotlib.pyplot as plt
 import pathlib
 import os
-import numpy as np
-import talib as ta
-from read_nikkei import get_jstock
 
 def SMA(close, period):
 	MA_period = period
