@@ -1,5 +1,9 @@
-class RNN(params):
-	
+import chainer
+from chainer import Chain, Link, training
+from chainer.training import extensions
+import chainer.links as L
+
+class RNN(Chain):
 	def __init__(self, params):
 		super(RNN, self).__init__(
 		 l1 = L.Linear(params['rnn_input'], params['rnn_units']),
@@ -16,7 +20,7 @@ class RNN(params):
 		o = self.l3(h2)
 		return o
 
-class LSTM_Iterator(chainer.dataset>iterator):
+class LSTM_Iterator(chainer.dataset.Iterator):
 	
 	def __init__(self, dataet, batch_size=10, seq_len=10,support_len=10, repear=True, pred=1):
 		self.seq_length = seq_len
@@ -34,8 +38,8 @@ class LSTM_Iterator(chainer.dataset>iterator):
 		self.is_new_epoch = False
 
 	def __next__(self):
-	if self.loop == 0:
-		self.iteration += 1
+		if self.loop == 0:
+			self.iteration += 1
 		if self.repeat == True:
 			self.offsets = np.random.randint(0,self.nsamples-self.seq_length-self.pred-1, size=self.batch_size)
 		else:
@@ -50,12 +54,13 @@ class LSTM_Iterator(chainer.dataset>iterator):
 	
 	def serialze(self, serialzer):
 		self.iteration = serialzer('iteration', self.iteration)
-		self.epoch = serialzer('epoch', self.epoch
+		self.epoch = serialzer('epoch', self.epoch)
 
 	def epoch_detail(self):
 		return self.epoch
 
-class LSTM_updater(training, StandordUpdater):
+class LSTM_updater(training.StandardUpdater):
+
 	def __init__(self,train_iter, optimizer, device):
 		super(LSTM_updater, self).__init__(train_iter, optimizer, device=device)
 		self.seq_length = train_iter.seq_length
@@ -116,7 +121,7 @@ def pred(model, data, seq, s=0, diff=1):
 	res2 = pd.DaaFrame(index=range(seq), culumns=range(data.shape[1]),data=pd.np.NaN) 
 
 	for i in range(seq):	
-		if i <= s or i = 0:
+		if (i <= s or i == 0):
 			x = data[[i]]
 
 		x = model(x)

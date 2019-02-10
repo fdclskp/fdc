@@ -8998,5 +8998,11 @@
         "epoch": 100,
         "iteration": 1500,
         "elapsed_time": 65.52010698791128
+    },
+    {
+        "main/loss": 0.000775919936131686,
+        "epoch": 100,
+        "iteration": 1501,
+        "elapsed_time": 65.73431140692264
     }
 ]
