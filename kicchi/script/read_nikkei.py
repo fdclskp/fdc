@@ -52,7 +52,7 @@ def get_jstock(code, freq='D', start=None, end=None, periods=None):
 
     # 'last' means last weekday (or today)
     if end == 'last':
-        end = pd.datetime.today()
+       end = pd.datetime.today()
 
     # Return "start" and "end"
     start, end = (x.date() if hasattr(x, 'date')
