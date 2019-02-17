@@ -15,9 +15,10 @@ import chainer.links as L
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
-from GraphConv import load_data
-from GraphConv import SGC
+from GraphConv import load_data, array_y, array_convert
+from GraphConv import SGC, Graph
 from GraphConv import RNN
+from GraphConv import DNN
 from GraphConv import lstm_func as lf
 
 
@@ -27,196 +28,71 @@ year = '2018'
 DATA_DIR = "indicator/stock_2016-2018/stock_indicator" + year + "/daily/"
 
 #ハイパーパラメータ
-model_params = {'rnn_input'  : 2,
-				'rnn_units'  : 10,
-				'rnn_output' : 1,
-				'num_features' : 6,
-				'gnn_layers' : 1,
-				}
-train_params = {'epochs' : 3,
-				}
-#TODO
-#load_data
+model_params = dict(rnn_input = 2,
+				rnn_units = 10,
+				rnn_output = 1,
+				num_features = 6,
+				gnn_layers = 1,
+				)
+train_params = dict(epochs = 3,
+				)
 
 stock_data = dict()
 class SGCRN(Chain):
 	def __init__(self, model_params):	
 		super(SGCRN, self).__init__(
 			sgc = SGC.SGC(model_params),
-			rnn = RNN.RNN(model_params),	
-			#f = None
+			dnn = DNN.DNN(model_params,5000),	
 		)
-
-
-	def __call__(self, x, y):
-		pred = self.prediction(x)
+	def __call__(self, x, y, params):
+		pred = self.prediction(x,params)
+		y = Variable(np.array(y, dtype=np.float32))
 		return F.mean_squared_error(pred,y)
 
-	def prediction(self,x):
-		#self.f = self.sgc(x, stock_data)
-		#pred = self.rnn(self.f)
-		print(x)
-		pred = self.rnn(x)
+	def prediction(self,x,params):
+		self.f, adj_list = self.sgc(x, stock_data, params)
+		pred = self.dnn.forward(self.f,adj_list)
 		return pred		
 			
 
-def train_model(Model, train_params, x_train, y_train, x_val=None, y_val=None):
+def train_model(Model,model_params, train_params, x_train, y_train, x_val=None, y_val=None):
 	training_curve = []
-	optimizre = oprimizer.Adam()
-	oprimizer.setup(Model)
-	
+	optimizer = optimizers.Adam()
+	optimizer.setup(Model)
 	for epoch in range(train_params['epochs']):
 		Model.zerograds()		
-		loss = Model(x_train,y_train)
+		loss = Model(x_train,y_train,model_params)
 		loss.backward()
-		optimizre.update()
-		print("TRAINING OK!")
-		import pdb;pdb.set_trace()
-		
-		cur_loss = loss.data[0]
+		optimizer.update()
+		cur_loss = loss._data[0]
 		training_curve.append(cur_loss)
 		print("Iteration ",epoch, ": train loss ", cur_loss)
 		#validation も後で追加
 	
 	return Model, training_curve
 
-def getSineData():
-    
-    N_data = 200
-    N_Loop = 4
-    t = np.linspace(0, 2*np.pi*N_Loop, num=N_data)
-    
-    X = 0.8*np.sin(2.0*t)
-    Y = 0.8*np.cos(1.0*t)
-    
-    N_train = int(N_data*0.75)
-#    N_test = int(N_data*0.25)
-    
-    DataSet = np.c_[X, Y].astype(np.float32)
-    
-    train, test = np.array(DataSet[:N_train]), np.array(DataSet[N_train:])
-    return train, test
-
-
-#def convert_from_gsp(filename):
-#	
-#	label_data = []
-#	neighbor_data = []
-#	
-#	data = np.array([])
-#	g = Graph()
-#	for line in open(filename, 'r'):
-#		line = line[:-1]
-#		line = line.split(' ')
-#		if line[0] == 't':
-#			label_data.append(line[3])
-#		elif line[0] == 'v':
-#			data = np.append(data, line[1])
-#			g.nodes = np.append(g.nodes, int(line[1]))
-#			#print('v')				
-#		elif line[0] == 'e':
-#			g.nodes = g.nodes.T
-#			print(g.nodes)
-#			g.nodes[int(line[2])] = np.append(g.nodes[int(line[2])], int(line[1]))
-#			#g.nodes[] = np.append(g.nodes, line[1])
-#			#data[int(line[1])].append(int(line[2]))
-#			#data[int(line[2])].append(int(line[1]))
-#		elif line[0] == "":
-#			data = np.append(data, g)	
-#			g = Graph()
-#
-#	for i in range(len(data)):
-#		print(data[i])
-#
-#	return data
-
-class Graph():
-	nodes = np.array([[]])
-	delta = np.array([])
-
-def array_convert(filename):
-	#後で一つにまとめる(array_y)
-	graph_array = np.array([])
-	g = Graph()
-	node_list = []
-	for line in open(filename, 'r'):
-		if line == '\n':
-			#print("in """)
-			graph_array = np.append(graph_array, g)
-			g.nodes = np.array(node_list)
-			#print(g.nodes)
-			g = Graph()
-			node_list = []
-		else:
-			line = line[:-1].split(' ')
-			line = [int(s) for s in line]
-			node_list.append(line)
-		
-	return graph_array
-
-def array_y(filename):
-	y_array = []
-	y = []
-	for line in open(filename, 'r'):
-		if line == '\n':
-			#print(y)
-			y_array.append(y)
-			y = []
-		else:
-			line = line[:-1]
-			y.append(line)
-
-	return np.array(y_array)
-
-#def concat_data(X, Y):
-#
-#	for i in  range(len(X)):
-#		for j in range(len(Y[i])):	
-#			X[i].nodes[j] = np.insert(X[i].nodes[j], 0, Y[i][j])
-#
-#	return X
-
-
 def main():
-	#print(year,"'s data")
-	#traindata,valdata,testdata = load_data(DATA_DIR)
-	#x_train, y_train = traindata
-	#x_val, y_val = valdata
-	#x_test, y_test = testdata
-	train, test = getSineData()
-	#dataset = convert_from_gsp('data.gsp')	
-	#x_dataset = array_convert('data_list.txt')
-	#y_dataset = array_y('data_y.txt')
-	##dataset = concat_data(x_dataset, y_dataset)
-	#x_train = x_dataset[:int(len(x_dataset)*0.7)]
-	#x_train = x_dataset[:2]
-	#x_test = x_dataset[int(len(x_dataset)*0.7):]
-	#y_train = y_dataset[:int(len(y_dataset)*0.7)]
-	#y_train = y_dataset[:2]
-	#y_test = y_dataset[int(len(y_dataset)*0.7):]
-	#(x_train, x_test, y_train, y_test) = train_test_split(
-    #x_dataset, y_dataset, test_size=0.3,)
+	x_dataset = array_convert('data_list.txt')
+	y_dataset = array_y('data_y.txt')
+	x_train = np.array(x_dataset[:int(len(x_dataset)*0.7)])
+	x_test = np.array(x_dataset[int(len(x_dataset)*0.7):])
+	y_train = np.array(y_dataset[:int(len(y_dataset)*0.7)])
+	y_test = np.array(y_dataset[int(len(y_dataset)*0.7):])
+
 	for line in open('data_features.txt', "r"):
 		line = line[:-1].split(',')
 		line = [int(s) for s in line]
-		stock_data[line[0]] = line[1:]
+		stock_data[str(line[0])] = line[1:]
 
 	def run_experiment():
 		Model = SGCRN(model_params)	
-
-		trained_Model, training_curve = \
-			train_model(Model,
-						x_train, y_train
-						)
-
-		evaluation = trained_Model(x_test,y_test) 
+		trained_Model, training_curve = train_model(Model,model_params, train_params, x_train, y_train)
+		evaluation = trained_Model(x_test,y_test, model_params) 
 		return evaluation, training_curve
 
-	Model = SGCRN(model_params)
-	#output = Model(x_train, y_train)
-	output = Model.prediction(train)
-
 	out = 'result_1'
+
+	evaluation, training_curve = run_experiment()
 
 
 #   グラフから特徴ベクトル抽出できたら以下を実行。
