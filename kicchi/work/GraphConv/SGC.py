@@ -27,7 +27,7 @@ class SGC(Chain):
 		with self.init_scope():
 			build_weights(self,params)
 				
-	def __call__(self, x, stock_data, params):
+	def __call__(self, x, stock_datas, params):
 
 		def read_features(self, graphs):
 			adj_list = []
@@ -37,7 +37,7 @@ class SGC(Chain):
 			for i in range(len(graphs)):
 				code_feature = []
 				for j in range(len(adj_list[i])):
-					code_feature.append(stock_data[str(adj_list[i][j][0])])
+					code_feature.append(stock_datas[i][str(adj_list[i][j][0])])
 				code_features.append(code_feature)
 			
 			numpy_code_features = np.empty((len(code_features),len(code_features[0]),len(code_features[0][0]),1), dtype=np.float32)

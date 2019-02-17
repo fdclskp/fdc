@@ -37,7 +37,7 @@ model_params = dict(rnn_input = 2,
 train_params = dict(epochs = 3,
 				)
 
-stock_data = dict()
+stock_datas = []
 class SGCRN(Chain):
 	def __init__(self, model_params):	
 		super(SGCRN, self).__init__(
@@ -50,7 +50,7 @@ class SGCRN(Chain):
 		return F.mean_squared_error(pred,y)
 
 	def prediction(self,x,params):
-		self.f, adj_list = self.sgc(x, stock_data, params)
+		self.f, adj_list = self.sgc(x, stock_datas, params)
 		pred = self.dnn.forward(self.f,adj_list)
 		return pred		
 			
@@ -79,10 +79,14 @@ def main():
 	y_train = np.array(y_dataset[:int(len(y_dataset)*0.7)])
 	y_test = np.array(y_dataset[int(len(y_dataset)*0.7):])
 
-	for line in open('data_features.txt', "r"):
-		line = line[:-1].split(',')
-		line = [int(s) for s in line]
-		stock_data[str(line[0])] = line[1:]
+	
+	for	filename in os.dirlist('features') 
+		stock_data = dict()
+		for line in open(filename, "r"):
+			line = line[:-1].split(',')
+			line = [int(s) for s in line]
+			stock_data[str(line[0])] = line[1:]
+		stock_datas.append(stock_data)
 
 	def run_experiment():
 		Model = SGCRN(model_params)	
