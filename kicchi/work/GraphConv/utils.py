@@ -35,6 +35,8 @@ def array_convert(filename):
 			graph_array.append(g)
 			g = Graph()
 			node_list = []
+		elif line[4] == '-':
+			continue
 		else:
 			line = line[:-1].split(' ')
 			line = [int(s) for s in line]
@@ -52,6 +54,6 @@ def array_y(filename):
 		else:
 			line = line[:-1]
 			
-			y.append(int(line))
+			y.append(float(line))
 
 	return y_data

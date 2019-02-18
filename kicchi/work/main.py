@@ -5,7 +5,7 @@
 #ファイルの指定
 #とか
 import numpy as np
-import glob
+import glob, os
 import pandas as pd
 import chainer
 from chainer import cuda, Function, Variable, optimizers
@@ -31,7 +31,7 @@ DATA_DIR = "indicator/stock_2016-2018/stock_indicator" + year + "/daily/"
 model_params = dict(rnn_input = 2,
 				rnn_units = 10,
 				rnn_output = 1,
-				num_features = 6,
+				num_features = 17,
 				gnn_layers = 1,
 				)
 train_params = dict(epochs = 3,
@@ -80,12 +80,16 @@ def main():
 	y_test = np.array(y_dataset[int(len(y_dataset)*0.7):])
 
 	
-	for	filename in os.dirlist('features') 
+	for	filename in glob.glob('./features/*'):
 		stock_data = dict()
 		for line in open(filename, "r"):
 			line = line[:-1].split(',')
-			line = [int(s) for s in line]
-			stock_data[str(line[0])] = line[1:]
+			for i in range(len(line)):
+				if line[i] != '':
+					line[i] = float(line[i])
+				else:
+					line[i] = 0
+			stock_data[str(int(line[0]))] = line[1:]
 		stock_datas.append(stock_data)
 
 	def run_experiment():
