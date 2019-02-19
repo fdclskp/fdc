@@ -8,7 +8,7 @@ import numpy as np
 import glob, os
 import pandas as pd
 import chainer
-from chainer import cuda, Function, Variable, optimizers
+from chainer import cuda, Function, Variable, optimizers,serializers
 from chainer import Link, Chain
 import chainer.functions as F
 import chainer.links as L
@@ -34,7 +34,7 @@ model_params = dict(rnn_input = 2,
 				num_features = 17,
 				gnn_layers = 1,
 				)
-train_params = dict(epochs = 3,
+train_params = dict(epochs = 1,
 				)
 
 stock_datas = []
@@ -96,11 +96,12 @@ def main():
 		Model = SGCRN(model_params)	
 		trained_Model, training_curve = train_model(Model,model_params, train_params, x_train, y_train)
 		evaluation = trained_Model(x_test,y_test, model_params) 
-		return evaluation, training_curve
+		return trained_Model, evaluation, training_curve
 
-	out = 'result_1'
+	out = 'result_1/'
 
-	evaluation, training_curve = run_experiment()
+	trained_Model, evaluation, training_curve = run_experiment()
+	serializers.save_npz(out + "mymodel.npz", model)
 
 
 #   グラフから特徴ベクトル抽出できたら以下を実行。
