@@ -28,6 +28,7 @@ def array_convert(filename):
 	#後で一つにまとめる(array_y)
 	graph_array = []
 	node_list = []
+	date_list = []
 	g = Graph()
 	for line in open(filename, 'r'):
 		if line == '\n':
@@ -36,13 +37,13 @@ def array_convert(filename):
 			g = Graph()
 			node_list = []
 		elif line[4] == '-':
-			continue
+			date_list.append(line[4])
 		else:
 			line = line[:-1].split(' ')
 			line = [int(s) for s in line]
 			node_list.append(line)
 		
-	return graph_array
+	return graph_array, date_list
 
 def array_y(filename):
 	y_data = []

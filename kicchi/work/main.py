@@ -32,9 +32,9 @@ model_params = dict(rnn_input = 2,
 				rnn_units = 10,
 				rnn_output = 1,
 				num_features = 17,
-				gnn_layers = 1,
+				gnn_layers = 3,
 				)
-train_params = dict(epochs = 1,
+train_params = dict(epochs = 1000,
 				)
 
 stock_datas = []
@@ -66,18 +66,23 @@ def train_model(Model,model_params, train_params, x_train, y_train, x_val=None, 
 		optimizer.update()
 		cur_loss = loss._data[0]
 		training_curve.append(cur_loss)
+		if (epoch % 100  == 0):
+			serializers.save_npz("result1/epoch_" + str(epoch) + "_fdcmodel.npz", Model) 
 		print("Iteration ",epoch, ": train loss ", cur_loss)
 		#validation も後で追加
 	
 	return Model, training_curve
 
 def main():
-	x_dataset = array_convert('data_list.txt')
+	x_dataset, date_list = array_convert('data_list.txt')
 	y_dataset = array_y('data_y.txt')
-	x_train = np.array(x_dataset[:int(len(x_dataset)*0.7)])
+	x_train = np.array(x_dataset[:int(len(x_dataset)*0.01)])
 	x_test = np.array(x_dataset[int(len(x_dataset)*0.7):])
-	y_train = np.array(y_dataset[:int(len(y_dataset)*0.7)])
+	y_train = np.array(y_dataset[:int(len(y_dataset)*0.01)])
 	y_test = np.array(y_dataset[int(len(y_dataset)*0.7):])
+
+	date_train = np.array(date_list[:int(len(date_list)*0.01)])
+	date_test = np.array(date_list[:int(len(date_list)*0.7)])
 
 	
 	for	filename in glob.glob('./features/*'):
@@ -98,10 +103,8 @@ def main():
 		evaluation = trained_Model(x_test,y_test, model_params) 
 		return trained_Model, evaluation, training_curve
 
-	out = 'result_1/'
 
 	trained_Model, evaluation, training_curve = run_experiment()
-	serializers.save_npz(out + "mymodel.npz", model)
 
 
 #   グラフから特徴ベクトル抽出できたら以下を実行。
