@@ -10,7 +10,7 @@ def build_weights(self, params, in_num):
 	initializer = chainer.initializers.HeNormal()
 	#for i in range(in_num):
 	#	setattr(self,'output_weights_' + str(i), L.Linear(params['num_features'],1))
-	setattr(self,'output_weights', L.Linear(params['num_features'],1))
+	setattr(self,'output_weights', L.Linear(params['num_features'],1, initialW=initializer))
 
 class DNN(Chain):
 	def __init__(self, params, in_num):

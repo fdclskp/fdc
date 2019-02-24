@@ -101,7 +101,7 @@ def main():
 	trained_Model, evaluation, training_curve = run_experiment()
 	pred, adj_list = trained_Model.prediction(x_test,model_params)
 	for i in range(len(pred[0][0])):
-		print("CODE : ", adj_list[0][i][0], " -> ", pred[0][0][i])
+		print("CODE : ", adj_list[0][i][0], " -> ", pred[0][0][i]._data[0])
 
 
 
