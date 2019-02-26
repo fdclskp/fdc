@@ -27,9 +27,9 @@ model_params = dict(rnn_input = 2,
 				rnn_units = 10,
 				rnn_output = 1,
 				num_features = 17,
-				gnn_layers = 1,
+				gnn_layers = 3,
 				)
-train_params = dict(epochs = 2,
+train_params = dict(epochs = 101,
 				)
 
 stock_datas = []
@@ -62,7 +62,7 @@ def train_model(Model,model_params, train_params, x_train, y_train, x_val=None, 
 		optimizer.update()
 		cur_loss = loss._data[0]
 		training_curve.append(cur_loss)
-		if (epoch % 100  == 0):
+		if (epoch % 10  == 0):
 			serializers.save_npz("result_1/epoch_" + str(epoch) + "_fdcmodel.npz", Model) 
 		print("Iteration ",epoch, ": train loss ", cur_loss)
 	
