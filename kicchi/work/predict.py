@@ -99,7 +99,7 @@ def main():
 
 	
 	trained_Model = SGCRN(model_params)
-	serializers.save_npz("result_1/epoch_" + str(0) + "_fdcmodel.npz", trained_Model) 
+	serializers.save_npz("result_1/trainer00040", trained_Model) 
 	pred, adj_list = trained_Model.prediction(x_test,model_params)
 	for i in range(len(pred[0][0])):
 		print("CODE : ", adj_list[0][i][0], " -> ", pred[0][0][i]._data[0])
